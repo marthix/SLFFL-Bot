@@ -17,6 +17,9 @@
   },
   "homepage": "https://github.com/marthix/SLFFL-Bot#readme",
   "dependencies": {
-    "express": "^4.15.4"
+    "body-parser": "^1.18.0",
+    "dotenv": "^4.0.0",
+    "express": "^4.15.4",
+    "request": "^2.81.0"
   }
 }
