@@ -1,4 +1,82 @@
-var Request   = require('request');
+var request = require('request');
+
+var scoreMessage;
+
+request({
+  uri: 'https://www.parsehub.com/api/v2/projects/tJTvzoTq6MRU/last_ready_run/data',
+  method: 'GET',
+  gzip: true,
+  qs: {
+    api_key: "twj65AfT0gyk",
+    format: "json"
+  }
+}, function(err, resp, body) {
+  scoreMessage = parseScores(JSON.parse(body))
+});
+
+var parseScores = function(scores) {
+  var attachmentArray = [];
+
+  Object.keys(scores.scores[0]).forEach(function(key){
+
+
+    var awayTeamArray = scores.scores[0][key][0].awayTeam.split('\n')
+    var homeTeamArray = scores.scores[0][key][0].homeTeam.split('\n')
+
+    var awayTeam = {
+      "title": parseName(awayTeamArray[0]),
+      "value": awayTeamArray[2],
+      "short": true,
+    };
+
+    var homeTeam = {
+      "title": parseName(homeTeamArray[0]),
+      "value": homeTeamArray[2],
+      "short": true,
+    };
+
+    var attachment = {
+      "fallback": "Plain text summary, fuck you.",
+      "color": "#000000",
+      "fields": [ awayTeam, homeTeam ],
+    };
+
+    attachmentArray.push(attachment)
+
+  })
+
+  var message = {
+    "response_type": 'in_channel',
+    "text": 'Scores for <' + scores.week_url + '|Week ' + scores.week + '>:',
+    "attachments": attachmentArray
+  }
+
+  return message;
+};
+
+var parseName = function(name) {
+
+  var userNames = {
+    Midget: 'Ten Foot Midget',
+    Proper: 'Proper Football',
+    Towelie: 'Terrible Towelie',
+    Tantrums: 'The Tantrums',
+    BOOYAHH: 'BOOYAAHH',
+    BuddyDangr: 'Buddy Danger',
+    HiDecibels: 'High Decibels',
+    Blitzed: 'Blitzed',
+    AOL4Life: 'AOL 4 Life',
+    Bapes: 'Bapes',
+    Coheeds: 'Connecticut Coheeds'
+  }
+
+  if (name === '4th9in') {
+    return '4th and 9 inches';
+  } else {
+    return userNames[name];
+  }
+
+}
 
 // frontend routes =========================================================
 module.exports = function(app) {
@@ -10,19 +88,11 @@ module.exports = function(app) {
   // post from Slack command
   app.post('/scores', function(req, res) {
     console.log("Command received")
-    console.log(req.body)
 
     //check request token
     if(req.body.token == process.env.SLACK_COMMAND_TOKEN){
-      var team_name = req.body.team_domain
-      var team_id = req.body.team_id
-      var user_name = req.body.user_name
-      var user_id = req.body.user_id
 
-      var text = req.body.text
-      console.log(text)
-      var blocks = text.split(" ")
-
+      res.send(scoreMessage)
 
     }
     else{
@@ -30,16 +100,6 @@ module.exports = function(app) {
       res.sendStatus(500)
     }
 
-  //   { token: 'lF0cLK0GTSr5kTjfNXyLhfvy',
-  // team_id: 'T0FEV82UE',
-  // team_domain: 'articial-client',
-  // channel_id: 'C0FEPJ7FW',
-  // channel_name: 'general',
-  // user_id: 'U0FESCLRH',
-  // user_name: 'aurelie',
-  // command: '/intro',
-  // text: 'test',
-  // response_url: 'https://hooks.slack.com/commands/T0FEV82UE/19407880118/Po47PwtwjSKR4hSlXSORn5fR' }
   });
 
 }
