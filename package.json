@@ -17,6 +17,9 @@
     "url": "https://github.com/marthix/SLFFL-Bot/issues"
   },
   "homepage": "https://github.com/marthix/SLFFL-Bot#readme",
+  "engines": {
+    "node": "6.9.5"
+  },
   "dependencies": {
     "body-parser": "^1.18.0",
     "dotenv": "^4.0.0",
