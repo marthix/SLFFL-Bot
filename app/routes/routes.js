@@ -1,24 +1,9 @@
 var request = require('request');
 
-var scoreMessage;
-
-request({
-  uri: 'https://www.parsehub.com/api/v2/projects/tJTvzoTq6MRU/last_ready_run/data',
-  method: 'GET',
-  gzip: true,
-  qs: {
-    api_key: "twj65AfT0gyk",
-    format: "json"
-  }
-}, function(err, resp, body) {
-  scoreMessage = parseScores(JSON.parse(body))
-});
-
 var parseScores = function(scores) {
   var attachmentArray = [];
 
   Object.keys(scores.scores[0]).forEach(function(key){
-
 
     var awayTeamArray = scores.scores[0][key][0].awayTeam.split('\n')
     var homeTeamArray = scores.scores[0][key][0].homeTeam.split('\n')
@@ -88,6 +73,20 @@ module.exports = function(app) {
   // post from Slack command
   app.post('/scores', function(req, res) {
     console.log("Command received")
+
+    var scoreMessage;
+
+    request({
+      uri: 'https://www.parsehub.com/api/v2/projects/tJTvzoTq6MRU/last_ready_run/data',
+      method: 'GET',
+      gzip: true,
+      qs: {
+        api_key: "twj65AfT0gyk",
+        format: "json"
+      }
+    }, function(err, resp, body) {
+      scoreMessage = parseScores(JSON.parse(body))
+    });
 
     //check request token
     if(req.body.token == process.env.SLACK_COMMAND_TOKEN){
